@@ -10,15 +10,15 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 class Settings
 {
-    const DB1_SERVER = 'localhost',
-        DB1_NAME = 'magento22',
-        DB1_USERNAME = 'magento',
-        DB1_PASSWORD = 'xebucow512';
+    const DB1_SERVER = 'someServer1',
+        DB1_NAME = 'someDatabase1',
+        DB1_USERNAME = 'someUser1',
+        DB1_PASSWORD = 'somePassword1';
 
-    const DB2_SERVER = 'localhost',
-        DB2_NAME = 'magento23',
-        DB2_USERNAME = 'magento',
-        DB2_PASSWORD = 'xebucow512';
+    const DB2_SERVER = 'someServer2',
+        DB2_NAME = 'someDatabase2',
+        DB2_USERNAME = 'someUser2',
+        DB2_PASSWORD = 'somePassword2';
 
     const MAX_VALUE_LENGTH = 75;
 
