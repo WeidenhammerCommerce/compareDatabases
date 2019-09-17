@@ -1,0 +1,12 @@
+{
+    "require": {
+        "symfony/console": "^4.3",
+        "illuminate/database": "^5.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Console\\": "app"
+        },
+        "classmap": ["app"]
+    }
+}

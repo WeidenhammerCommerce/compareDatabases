@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use Console\App\Commands\CompareCommand;
+
+$app = new Application('Compare Magento 2 tables', 'v1.0.0');
+$app->add(new CompareCommand());
+$app->run();
