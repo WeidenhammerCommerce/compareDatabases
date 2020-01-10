@@ -2,3 +2,6 @@
 !/.gitignore
 !/app
 !/bin
+!/composer.json
+!/composer.lock
+!/README.md
