@@ -14,6 +14,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 // use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
+use Fastbolt\SSH\SSH;
+use Fastbolt\SSH\Config;
+use Fastbolt\SSH\SSHException;
 
 class CompareCommand extends Command
 {
@@ -26,15 +29,38 @@ class CompareCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // $input->getArgument('username')
-
-        // Start
-        Settings::connectToDb();
         $io = new SymfonyStyle($input, $output);
         $io->title('Database comparison');
 
+        // Open SSH Tunnel
+        $sshTunnel = new SSH();
+        $sshConfig = new Config();
+        try {
+            $sshConfig
+                ->setForwardHostRemote(Settings::SSH_FORWARD_HOST_REMOTE)
+                ->setForwardPortLocal(Settings::SSH_FORWARD_PORT_LOCAL)
+                ->setForwardPortRemote(Settings::SSH_FORWARD_PORT_REMOTE)
+                ->setPrivateKeyFilename(Settings::SSH_PRIVATE_KEY_FILENAME)
+                ->setSshHostname(Settings::SSH_HOSTNAME)
+                ->setSshPort(Settings::SSH_PORT)
+                ->setSshUsername(Settings::SSH_USERNAME);
+            $sshTunnel->openTunnel($sshConfig);
+        } catch (SSHException $e) {
+            $io->error($e->getMessage());
+            return;
+        }
+
+        // Connect to DB
+        Settings::connectToDb();
+
         // Test connection
-        // $this->testConnection($io);
+        try {
+            if (!$this->testConnection($io)) {
+                $sshTunnel->close();
+            }
+        } catch (SSHException $e) {
+            $io->error($e->getMessage());
+        }
 
         // Select mode
         $selectedMode = $io->choice('Select mode to compare', [
@@ -91,6 +117,14 @@ class CompareCommand extends Command
                 $io->newLine();
                 break;
         endswitch;
+
+        // Close SSH Tunnel
+        try {
+            $sshTunnel->close();
+        } catch (SSHException $e) {
+            $io->error($e->getMessage());
+            return;
+        }
     }
 
 
@@ -105,13 +139,14 @@ class CompareCommand extends Command
             ->first();
 
         if (isset($config->path)) {
-            $io->success('Connection establish a successfully');
+            $io->success('Connection established successfully');
             $io->text($config->path . ' => ' . $config->value);
             $io->newLine();
         } else {
             $io->error('Couldn\'t establish a connection');
+            return false;
         }
 
-        exit;
+        return true;
     }
 }

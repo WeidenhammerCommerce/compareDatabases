@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "df84703444dee33ef41eff284fd80515",
+    "content-hash": "d5373c573a57f4cc852e0264c6ff51d1",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -72,6 +72,51 @@
                 "string"
             ],
             "time": "2018-01-09T20:05:19+00:00"
+        },
+        {
+            "name": "fastbolt/ssh",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fastbolt/ssh.git",
+                "reference": "d19ef15d58787f6c56bab511e05c8a894d487ba9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fastbolt/ssh/zipball/d19ef15d58787f6c56bab511e05c8a894d487ba9",
+                "reference": "d19ef15d58787f6c56bab511e05c8a894d487ba9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0",
+                "symfony/process": "^3.1"
+            },
+            "require-dev": {
+                "jakub-onderka/php-parallel-lint": "0.9",
+                "phpunit/phpunit": "~5.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Fastbolt\\SSH\\": "src/Fastbolt/SSH"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Hirtzbruch",
+                    "email": "dhh@fastbolt.com"
+                }
+            ],
+            "description": "SSH Tunnel Library",
+            "homepage": "https://www.fastbolt.com",
+            "keywords": [
+                "ssh"
+            ],
+            "time": "2017-05-11T07:44:11+00:00"
         },
         {
             "name": "illuminate/container",
@@ -638,6 +683,55 @@
                 "shim"
             ],
             "time": "2019-08-06T08:03:45+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v3.4.36",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "9a4545c01e1e4f473492bd52b71e574dcc401ca2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/9a4545c01e1e4f473492bd52b71e574dcc401ca2",
+                "reference": "9a4545c01e1e4f473492bd52b71e574dcc401ca2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5.9|>=7.0.8"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Process Component",
+            "homepage": "https://symfony.com",
+            "time": "2019-11-28T10:05:51+00:00"
         },
         {
             "name": "symfony/service-contracts",
