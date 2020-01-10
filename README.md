@@ -3,9 +3,11 @@
 
 ## :eye: Installation
 
-1) Set database variables in app/Settings.php
+1) Run following command to install dependencies: ``composer install``
 
-2) Run the following command to init the interactive utility:
+2) Set database variables in app/Settings.php
+
+3) Run the following command to init the interactive utility:
 ```
 $ bin/console compare
 ```
