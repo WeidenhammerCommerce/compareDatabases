@@ -26,7 +26,7 @@ class CompareCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Database comparison');
-        $io->comment('Connecting');
+        $io->text('Connecting');
 
         // Open SSH Tunnels
         try {
@@ -121,7 +121,7 @@ class CompareCommand extends Command
 
 
 
-    
+
     /**
      * Test connection by getting Base URL
      */
@@ -162,7 +162,8 @@ class CompareCommand extends Command
         $io->newLine();
         try {
             $openedTunnels->closeTunnels();
-            $io->comment('Connection closed');
+            $io->text('Connection closed');
+            $io->newLine();
         } catch (\Exception $e) {
             $io->error($e->getMessage());
 
