@@ -2,7 +2,8 @@
     "require": {
         "symfony/console": "^4.3",
         "illuminate/database": "^5.8",
-        "fastbolt/ssh": "^1.0"
+        "fastbolt/ssh": "^1.0",
+        "symfony/yaml": "^4.4"
     },
     "autoload": {
         "psr-4": {
