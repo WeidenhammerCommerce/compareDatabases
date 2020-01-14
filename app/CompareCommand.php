@@ -32,9 +32,16 @@ class CompareCommand extends Command
         // Open SSH Tunnels
         try {
             $sshTunnels = new Tunnel();
-            $sshTunnels->openTunnels();
+            /** @var Tunnel $openedTunnels */
+            $openedTunnels = $sshTunnels->openTunnels();
         } catch (\Exception $e) {
             $io->error($e->getMessage());
+            return;
+        }
+
+        // Error occurred when opening SSH tunnels
+        if ($openedTunnels->getHasError()) {
+            $io->error($openedTunnels->getErrorMessage());
             return;
         }
 
@@ -44,10 +51,12 @@ class CompareCommand extends Command
         // Test connection
         try {
             if (!$this->testConnection($io)) {
-                $sshTunnels->closeTunnels();
+                $openedTunnels->closeTunnels();
             }
         } catch (\Exception $e) {
+            $openedTunnels->closeTunnels();
             $io->error($e->getMessage());
+            return;
         }
 
         // Select mode
@@ -56,34 +65,42 @@ class CompareCommand extends Command
             'Another table'
         ]);
 
+        // DB config
+        $dbConfig = Settings::getYamlConfig('databases');
+
         // Process selection
         switch ($selectedMode) :
             case 'Configurations (core_config_data)' :
 
-                $dataDb1 = CoreConfigData::on(Settings::DB1_NAME)
-                    ->select('config_id', 'scope_id', 'path', 'value')
-                    ->get();
+                try {
+                    $dataDb1 = CoreConfigData::on($dbConfig['db1']['database'])
+                        ->select('config_id', 'scope_id', 'path', 'value')
+                        ->get();
 
-                $dataDb2 = CoreConfigData::on(Settings::DB2_NAME)
-                    ->select('config_id', 'scope_id', 'path', 'value')
-                    ->get();
+                    $dataDb2 = CoreConfigData::on($dbConfig['db2']['database'])
+                        ->select('config_id', 'scope_id', 'path', 'value')
+                        ->get();
+                } catch (\Exception $e) {
+                    $io->error($e->getMessage());
+                    return;
+                }
 
                 // Select direction
                 $selectedDirection = $io->choice('Select direction to compare', [
-                    Settings::DB1_NAME . ' => ' . Settings::DB2_NAME,
-                    Settings::DB2_NAME . ' => ' . Settings::DB1_NAME
+                    $dbConfig['db1']['database'] . ' => ' . $dbConfig['db2']['database'],
+                    $dbConfig['db2']['database'] . ' => ' . $dbConfig['db1']['database']
                 ]);
 
                 // Process data
-                if ($selectedDirection == (Settings::DB1_NAME . ' => ' . Settings::DB2_NAME)) {
-                    $primaryDb = Settings::DB1_NAME;
-                    $secondaryDb = Settings::DB2_NAME;
-                    $headers = ['path', 'scope_id', Settings::DB1_NAME, Settings::DB2_NAME];
+                if ($selectedDirection == ($dbConfig['db1']['database'] . ' => ' . $dbConfig['db2']['database'])) {
+                    $primaryDb = $dbConfig['db1']['database'];
+                    $secondaryDb = $dbConfig['db2']['database'];
+                    $headers = ['path', 'scope_id', $dbConfig['db1']['database'], $dbConfig['db2']['database']];
                     $finalArray = CoreConfigData::compareConfigurations($dataDb1, $dataDb2);
                 } else {
-                    $primaryDb = Settings::DB2_NAME;
-                    $secondaryDb = Settings::DB1_NAME;
-                    $headers = ['path', 'scope_id', Settings::DB2_NAME, Settings::DB1_NAME];
+                    $primaryDb = $dbConfig['db2']['database'];
+                    $secondaryDb = $dbConfig['db1']['database'];
+                    $headers = ['path', 'scope_id', $dbConfig['db2']['database'], $dbConfig['db1']['database']];
                     $finalArray = CoreConfigData::compareConfigurations($dataDb2, $dataDb1);
                 }
 
@@ -108,7 +125,7 @@ class CompareCommand extends Command
 
         // Close SSH Tunnel
         try {
-            $sshTunnels->closeTunnels();
+            $openedTunnels->closeTunnels();
         } catch (\Exception $e) {
             $io->error($e->getMessage());
             return;
@@ -121,7 +138,9 @@ class CompareCommand extends Command
      */
     private function testConnection($io)
     {
-        $config = CoreConfigData::on(Settings::DB1_NAME)
+        $dbConfig = Settings::getYamlConfig('databases');
+
+        $config = CoreConfigData::on($dbConfig['db1']['database'])
             ->where('path', 'web/unsecure/base_url')
             ->get()
             ->first();

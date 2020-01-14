@@ -1,0 +1,33 @@
+# SSH Tunnel config
+ssh_tunnel:
+  ssh1:
+    forward_host_remote: 127.0.0.1
+    forward_port_local: 3307
+    forward_port_remote: 3306
+    port: 22
+    hostname: hostname
+    username: username
+    private_key_filename: private_key_filename
+  ssh2:
+    forward_host_remote: 127.0.0.1
+    forward_port_local: 3308
+    forward_port_remote: 3306
+    port: 22
+    hostname: hostname
+    username: username
+    private_key_filename: private_key_filename
+
+# Database config
+databases:
+  db1:
+    host: 127.0.0.1
+    port: 3307
+    database: db1_name
+    username: db1_username
+    password: db1_password
+  db2:
+    host: 127.0.0.1
+    port: 3308
+    database: db2_name
+    username: db2_username
+    password: db2_password

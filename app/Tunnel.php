@@ -18,74 +18,90 @@ class Tunnel
     protected $hasError = false;
 
     /**
-     * @var SSH
+     * @var string
      */
-    protected $firstTunnel;
+    protected $errorMessage = '';
 
     /**
-     * @var SSH
+     * @var array
      */
-    protected $secondTunnel;
+    protected $tunnels = [];
 
     /**
      * Open SSH tunnels
      *
-     * @return array
+     * @return $this|array
      */
     public function openTunnels()
     {
         try {
-            // Open first SSH Tunnel
-            $sshTunnel = new SSH();
-            $sshConfig = new Config();
+            // Get YAML config
+            $yamlConfig = Settings::getYamlConfig('ssh_tunnel');
 
-            $sshConfig
-                ->setForwardHostRemote(Settings::SSH1_FORWARD_HOST_REMOTE)
-                ->setForwardPortLocal(Settings::SSH1_FORWARD_PORT_LOCAL)
-                ->setForwardPortRemote(Settings::SSH1_FORWARD_PORT_REMOTE)
-                ->setPrivateKeyFilename(Settings::SSH1_PRIVATE_KEY_FILENAME)
-                ->setSshHostname(Settings::SSH1_HOSTNAME)
-                ->setSshPort(Settings::SSH1_PORT)
-                ->setSshUsername(Settings::SSH1_USERNAME);
-            $this->firstTunnel = $sshTunnel->openTunnel($sshConfig);
+            // Open SSH tunnels
+            foreach ($yamlConfig as $sshConfig) {
+                $sshTunnel = new SSH();
+                $tunnelConfig = new Config();
 
-            // Open second SSH Tunnel
-            $sshTunnel = new SSH();
-            $sshConfig = new Config();
+                // Create config
+                $tunnelConfig
+                    ->setForwardHostRemote($sshConfig['forward_host_remote'])
+                    ->setForwardPortLocal($sshConfig['forward_port_local'])
+                    ->setForwardPortRemote($sshConfig['forward_port_remote'])
+                    ->setPrivateKeyFilename($sshConfig['private_key_filename'])
+                    ->setSshHostname($sshConfig['hostname'])
+                    ->setSshPort($sshConfig['port'])
+                    ->setSshUsername($sshConfig['username']);
 
-            $sshConfig
-                ->setForwardHostRemote(Settings::SSH2_FORWARD_HOST_REMOTE)
-                ->setForwardPortLocal(Settings::SSH2_FORWARD_PORT_LOCAL)
-                ->setForwardPortRemote(Settings::SSH2_FORWARD_PORT_REMOTE)
-                ->setPrivateKeyFilename(Settings::SSH2_PRIVATE_KEY_FILENAME)
-                ->setSshHostname(Settings::SSH2_HOSTNAME)
-                ->setSshPort(Settings::SSH2_PORT)
-                ->setSshUsername(Settings::SSH2_USERNAME);
-            $this->secondTunnel = $sshTunnel->openTunnel($sshConfig);
+                // Open SSH Tunnel
+                $this->tunnels[] = $sshTunnel->openTunnel($tunnelConfig);
+            }
         } catch (SSHException $e) {
-            $this->setHasError(true);
-            return [
-                'error' => true,
-                'message' => $e->getMessage()
-            ];
+            $this->setHasError(true)
+                ->setErrorMessage($e->getMessage());
+
+            $this->closeTunnels();
         }
+
+        return $this;
     }
 
     /**
-     * Close SSH tunnel
+     * Close SSH tunnels
      *
      * @return bool|string
      */
     public function closeTunnels()
     {
         try {
-            $this->firstTunnel->close();
-            $this->secondTunnel->close();
+            foreach ($this->tunnels as $sshTunnel) {
+                /** @var SSH $sshTunnel */
+                $sshTunnel->close();
+            }
         } catch (SSHException $e) {
             return $e->getMessage();
         }
 
         return true;
+    }
+
+    /**
+     * @param $message
+     * @return $this
+     */
+    protected function setErrorMessage($message)
+    {
+        $this->errorMessage = $message;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
     }
 
     /**
@@ -100,7 +116,7 @@ class Tunnel
      * @param $hasError
      * @return $this
      */
-    public function setHasError($hasError)
+    protected function setHasError($hasError)
     {
         $this->hasError = $hasError;
 
@@ -108,18 +124,10 @@ class Tunnel
     }
 
     /**
-     * @return SSH
+     * @return array
      */
-    protected function getFirstTunnel()
+    public function getTunnels()
     {
-        return $this->firstTunnel;
-    }
-
-    /**
-     * @return SSH
-     */
-    protected function getSecondTunnel()
-    {
-        return $this->secondTunnel;
+        return $this->tunnels;
     }
 }
