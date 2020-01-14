@@ -2,7 +2,7 @@
 !/.gitignore
 !/app
 !/bin
-!/config
+!/config/settings.yaml.sample
 !/composer.json
 !/composer.lock
 !/README.md
