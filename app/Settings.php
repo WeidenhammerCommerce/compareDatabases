@@ -11,7 +11,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class Settings
 {
-    const MAX_VALUE_LENGTH = 75;
+    const MAX_VALUE_LENGTH = 50;
 
     public static function connectToDb()
     {

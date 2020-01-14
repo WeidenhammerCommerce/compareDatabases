@@ -7,7 +7,7 @@ ssh_tunnel:
     port: 22
     hostname: hostname
     username: username
-    private_key_filename: private_key_filename
+    private_key_filename: /home/user/.ssh/id_rsa
   ssh2:
     forward_host_remote: 127.0.0.1
     forward_port_local: 3308
@@ -15,17 +15,19 @@ ssh_tunnel:
     port: 22
     hostname: hostname
     username: username
-    private_key_filename: private_key_filename
+    private_key_filename: /home/user/.ssh/id_rsa
 
 # Database config
 databases:
   db1:
+    alias: staging
     host: 127.0.0.1
     port: 3307
     database: db1_name
     username: db1_username
     password: db1_password
   db2:
+    alias: production
     host: 127.0.0.1
     port: 3308
     database: db2_name
