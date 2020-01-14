@@ -14,9 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 // use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
-use Fastbolt\SSH\SSH;
-use Fastbolt\SSH\Config;
-use Fastbolt\SSH\SSHException;
 
 class CompareCommand extends Command
 {
@@ -32,20 +29,11 @@ class CompareCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Database comparison');
 
-        // Open SSH Tunnel
-        $sshTunnel = new SSH();
-        $sshConfig = new Config();
+        // Open SSH Tunnels
         try {
-            $sshConfig
-                ->setForwardHostRemote(Settings::SSH_FORWARD_HOST_REMOTE)
-                ->setForwardPortLocal(Settings::SSH_FORWARD_PORT_LOCAL)
-                ->setForwardPortRemote(Settings::SSH_FORWARD_PORT_REMOTE)
-                ->setPrivateKeyFilename(Settings::SSH_PRIVATE_KEY_FILENAME)
-                ->setSshHostname(Settings::SSH_HOSTNAME)
-                ->setSshPort(Settings::SSH_PORT)
-                ->setSshUsername(Settings::SSH_USERNAME);
-            $sshTunnel->openTunnel($sshConfig);
-        } catch (SSHException $e) {
+            $sshTunnels = new Tunnel();
+            $sshTunnels->openTunnels();
+        } catch (\Exception $e) {
             $io->error($e->getMessage());
             return;
         }
@@ -56,9 +44,9 @@ class CompareCommand extends Command
         // Test connection
         try {
             if (!$this->testConnection($io)) {
-                $sshTunnel->close();
+                $sshTunnels->closeTunnels();
             }
-        } catch (SSHException $e) {
+        } catch (\Exception $e) {
             $io->error($e->getMessage());
         }
 
@@ -120,8 +108,8 @@ class CompareCommand extends Command
 
         // Close SSH Tunnel
         try {
-            $sshTunnel->close();
-        } catch (SSHException $e) {
+            $sshTunnels->closeTunnels();
+        } catch (\Exception $e) {
             $io->error($e->getMessage());
             return;
         }

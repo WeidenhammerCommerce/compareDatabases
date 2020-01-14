@@ -10,13 +10,21 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 class Settings
 {
-    const SSH_FORWARD_HOST_REMOTE = 'someHostRemote',
-        SSH_FORWARD_PORT_LOCAL = 'somePortLocal',
-        SSH_FORWARD_PORT_REMOTE = 'somePortRemote',
-        SSH_PRIVATE_KEY_FILENAME = 'somePathPrivateKey',
-        SSH_HOSTNAME = 'someHostName',
-        SSH_PORT = 'somePort',
-        SSH_USERNAME = 'someUsername';
+    const SSH1_FORWARD_HOST_REMOTE = 'someHostRemote',
+        SSH1_FORWARD_PORT_LOCAL = 'somePortLocal',
+        SSH1_FORWARD_PORT_REMOTE = 'somePortRemote',
+        SSH1_PRIVATE_KEY_FILENAME = 'somePathPrivateKey',
+        SSH1_HOSTNAME = 'someHostName',
+        SSH1_PORT = 'somePort',
+        SSH1_USERNAME = 'someUsername';
+
+    const SSH2_FORWARD_HOST_REMOTE = 'someHostRemote',
+        SSH2_FORWARD_PORT_LOCAL = 'somePortLocal',
+        SSH2_FORWARD_PORT_REMOTE = 'somePortRemote',
+        SSH2_PRIVATE_KEY_FILENAME = 'somePathPrivateKey',
+        SSH2_HOSTNAME = 'someHostName',
+        SSH2_PORT = 'somePort',
+        SSH2_USERNAME = 'someUsername';
 
     const DB1_SERVER = 'someServer1',
         DB1_PORT = 'somePort',
