@@ -8,6 +8,7 @@ namespace Console\App\Commands;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
@@ -18,21 +19,31 @@ class CompareCommand extends Command
     protected function configure()
     {
         $this->setName('compare')
-            ->setDescription('Compare contents of a database table for two Magento instances');
-        // ->addArgument('username', InputArgument::REQUIRED, 'Pass some argument.');
+            ->setDescription('Compare contents of a database table for two Magento instances')
+            ->addOption('project', 'p', InputOption::VALUE_REQUIRED, 'Specify project');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // Get project option
+        $project = strtolower($input->getOption('project'));
+
         $io = new SymfonyStyle($input, $output);
+        if (empty($project)) {
+            $io->error('Project must be specified. Example: bin/console compare -p project');
+            return;
+        }
+
         $io->title('Database comparison');
-        $io->text('Connecting');
+        $io->text('Connecting to '.ucfirst($project));
 
         // Open SSH Tunnels
         try {
             $sshTunnels = new Tunnel();
             /** @var Tunnel $openedTunnels */
-            $openedTunnels = $sshTunnels->openTunnels();
+            $openedTunnels = $sshTunnels
+                ->setProject($project)
+                ->openTunnels();
         } catch (\Exception $e) {
             $io->error($e->getMessage());
 
@@ -47,11 +58,11 @@ class CompareCommand extends Command
         }
 
         // Connect to DB
-        Settings::connectToDb();
+        Settings::connectToDb($project);
 
         // Test connection
         try {
-            if (!$this->testConnection($io)) {
+            if (!$this->testConnection($io, $project)) {
                 $openedTunnels->closeTunnels();
             }
         } catch (\Exception $e) {
@@ -65,18 +76,18 @@ class CompareCommand extends Command
         $this->comparisionTool($openedTunnels, $io, $input, $output);
     }
 
-
     /**
      * Comparision tool
-     * @param $openedTunnels
+     * @param $openedTunnels Tunnel
      * @param $io
      * @param $input
      * @param $output
+     * @throws \Exception
      */
     protected function comparisionTool($openedTunnels, $io, $input, $output)
     {
         // DB config
-        $dbConfig = Settings::getYamlConfig('databases');
+        $dbConfig = Settings::getYamlConfig($openedTunnels->getProject(), 'databases');
 
         // Select mode
         $selectedMode = $io->choice('Select tool', [
@@ -119,15 +130,12 @@ class CompareCommand extends Command
         $this->comparisionTool($openedTunnels, $io, $input, $output);
     }
 
-
-
-
     /**
      * Test connection by getting Base URL
      */
-    private function testConnection($io)
+    private function testConnection($io, $project)
     {
-        $dbConfig = Settings::getYamlConfig('databases');
+        $dbConfig = Settings::getYamlConfig($project, 'databases');
 
         $config1 = CoreConfigData::on($dbConfig['db1']['database'])
             ->where('path', 'web/unsecure/base_url')
@@ -151,7 +159,6 @@ class CompareCommand extends Command
         return true;
     }
 
-
     /**
      * Close SSH Tunnels
      * @param $openedTunnels
@@ -171,7 +178,6 @@ class CompareCommand extends Command
         }
     }
 
-
     /**
      * Get config value by database/path
      * @param $database
@@ -185,7 +191,6 @@ class CompareCommand extends Command
             ->where('path', '=', $path)
             ->get();
     }
-
 
     /**
      * Populate table with core_config_data values
@@ -228,7 +233,6 @@ class CompareCommand extends Command
         return $configsAll;
     }
 
-
     /**
      * Render table with core_config_data values
      * @param $headers
@@ -244,7 +248,6 @@ class CompareCommand extends Command
         $table->render();
         $io->newLine();
     }
-
 
     /**
      * Format value

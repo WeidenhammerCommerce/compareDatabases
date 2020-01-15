@@ -28,6 +28,11 @@ class Tunnel
     protected $tunnels = [];
 
     /**
+     * @var string
+     */
+    protected $project;
+
+    /**
      * Open SSH tunnels
      *
      * @return $this|array
@@ -36,7 +41,7 @@ class Tunnel
     {
         try {
             // Get YAML config
-            $yamlConfig = Settings::getYamlConfig('ssh_tunnel');
+            $yamlConfig = Settings::getYamlConfig($this->project, 'ssh_tunnel');
 
             // Open SSH tunnels
             foreach ($yamlConfig as $sshConfig) {
@@ -119,6 +124,25 @@ class Tunnel
     protected function setHasError($hasError)
     {
         $this->hasError = $hasError;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+
+    /**
+     * @param $project
+     * @return $this
+     */
+    public function setProject($project)
+    {
+        $this->project = $project;
 
         return $this;
     }

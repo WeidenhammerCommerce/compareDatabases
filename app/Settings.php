@@ -13,10 +13,10 @@ class Settings
 {
     const MAX_VALUE_LENGTH = 50;
 
-    public static function connectToDb()
+    public static function connectToDb($project)
     {
         // Get YAML config
-        $yamlConfig = self::getYamlConfig('databases');
+        $yamlConfig = self::getYamlConfig($project, 'databases');
 
         $capsule = new Capsule;
 
@@ -42,12 +42,20 @@ class Settings
     }
 
     /**
+     * @param string $project
      * @param string $section
      * @return mixed
+     * @throws \Exception
      */
-    public static function getYamlConfig($section = '')
+    public static function getYamlConfig($project = '', $section = '')
     {
-        $config = Yaml::parseFile(__DIR__.'/../config/settings.yaml');
+        $yamlPath = __DIR__.'/../config/'.$project.'/settings.yaml';
+
+        if (!file_exists($yamlPath)) {
+            throw new \Exception('Configuration file is missing for project: '.$project);
+        }
+
+        $config = Yaml::parseFile($yamlPath);
 
         if (!empty($section) && isset($config[$section])) {
             return $config[$section];
