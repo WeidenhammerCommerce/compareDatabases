@@ -1,0 +1,8 @@
+/*
+!/.gitignore
+!/app
+!/bin
+!/config/settings.yaml.sample
+!/composer.json
+!/composer.lock
+!/README.md

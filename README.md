@@ -3,11 +3,18 @@
 
 ## :eye: Installation
 
-1) Set database variables in app/Settings.php
+1) Run following command to install dependencies: `composer install`
 
-2) Run the following command to init the interactive utility:
+2) Configure SSH and database settings
+    - Configuration files lives in: `/config`
+    - Each project should have it's own directory. Example: `/config/Project`
+    - Inside each project's directory there should be a `settings.yaml` file
+      - Structure should look like: `/config/project/settings.yaml` 
+      - `/config/settings.yaml.sample` should be used as skeleton
+
+3) Run the following command to init the interactive utility:
 ```
-$ bin/console compare
+$ bin/console compare -p <projectname>
 ```
 
 # Send us your feedback!

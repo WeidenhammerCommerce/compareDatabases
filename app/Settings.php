@@ -7,54 +7,60 @@
 namespace Console\App\Commands;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Symfony\Component\Yaml\Yaml;
 
 class Settings
 {
-    const DB1_SERVER = 'someServer1',
-        DB1_NAME = 'someDatabase1',
-        DB1_USERNAME = 'someUser1',
-        DB1_PASSWORD = 'somePassword1';
+    const MAX_VALUE_LENGTH = 50;
 
-    const DB2_SERVER = 'someServer2',
-        DB2_NAME = 'someDatabase2',
-        DB2_USERNAME = 'someUser2',
-        DB2_PASSWORD = 'somePassword2';
-
-    const MAX_VALUE_LENGTH = 75;
-
-    public static function connectToDb()
+    public static function connectToDb($project)
     {
+        // Get YAML config
+        $yamlConfig = self::getYamlConfig($project, 'databases');
+
         $capsule = new Capsule;
 
-        $capsule->addConnection(
-            [
-                'driver'    => 'mysql',
-                'host'      => self::DB1_SERVER,
-                'database'  => self::DB1_NAME,
-                'username'  => self::DB1_USERNAME,
-                'password'  => self::DB1_PASSWORD,
-                'charset'   => 'utf8',
-                'collation' => 'utf8_unicode_ci',
-                'prefix'    => '',
-            ],
-            self::DB1_NAME
-        );
-
-        $capsule->addConnection(
-            [
-                'driver'    => 'mysql',
-                'host'      => self::DB2_SERVER,
-                'database'  => self::DB2_NAME,
-                'username'  => self::DB2_USERNAME,
-                'password'  => self::DB2_PASSWORD,
-                'charset'   => 'utf8',
-                'collation' => 'utf8_unicode_ci',
-                'prefix'    => '',
-            ],
-            self::DB2_NAME
-        );
+        foreach ($yamlConfig as $database) {
+            $capsule->addConnection(
+                [
+                    'driver'    => 'mysql',
+                    'host'      => $database['host'],
+                    'port'      => $database['port'],
+                    'database'  => $database['database'],
+                    'username'  => $database['username'],
+                    'password'  => $database['password'],
+                    'charset'   => 'utf8',
+                    'collation' => 'utf8_unicode_ci',
+                    'prefix'    => '',
+                ],
+                $database['database']
+            );
+        }
 
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
+    }
+
+    /**
+     * @param string $project
+     * @param string $section
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function getYamlConfig($project = '', $section = '')
+    {
+        $yamlPath = __DIR__.'/../config/'.$project.'/settings.yaml';
+
+        if (!file_exists($yamlPath)) {
+            throw new \Exception('Configuration file is missing for project: '.$project);
+        }
+
+        $config = Yaml::parseFile($yamlPath);
+
+        if (!empty($section) && isset($config[$section])) {
+            return $config[$section];
+        }
+
+        return $config;
     }
 }
